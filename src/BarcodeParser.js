@@ -886,6 +886,22 @@ const parseBarcode = (function () {
                         // Ship for - Deliver for - Forward to Global Location Number
                         parseFixedLength("413", "SHIP FOR LOC", 13);
                         break;
+                    case "4":
+                        // Ship for - Deliver for - Forward to Global Location Number
+                        parseFixedLength("414", "LOC No", 13);
+                        break;
+                    case "5":
+                        // Ship for - Deliver for - Forward to Global Location Number
+                        parseFixedLength("415", "PAY TO", 13);
+                        break;
+                    case "6":
+                        // Ship for - Deliver for - Forward to Global Location Number
+                        parseFixedLength("416", "PROD/SERV LOC", 13);
+                        break;
+                    case "7":
+                        // Ship for - Deliver for - Forward to Global Location Number
+                        parseFixedLength("417", "PARTY", 13);
+                        break;
                     default:
                         throw "15";
                     }
