@@ -181,9 +181,14 @@ const parseBarcode = (function () {
                     yearAsNumber = 0,
                     monthAsNumber = 0,
                     dayAsNumber = 0;
+                var currentCCYY = new Date().getUTCFullYear(),
+                    currentYear = currentCCYY % 100,
+                    currentCentury = currentCCYY - currentYear,
+                    yearGap = 0;
 
                 try {
                     yearAsNumber = parseInt(dateYYMMDD.slice(0, 2), 10);
+                    yearGap = yearAsNumber - currentYear;
                 } catch (e33) {
                     throw "33";
                 }
@@ -199,14 +204,24 @@ const parseBarcode = (function () {
                 } catch (e35) {
                     throw "35";
                 }
-                // we are in the 21st century, but section 7.12 of the specification
-                // states that years 51-99 should be considered to belong to the
-                // 20th century:
-                if (yearAsNumber > 50) {
-                    yearAsNumber = yearAsNumber + 1900;
+                // Year determination
+                //   use a sliding window going from -49 years to +50 years
+                //   as specified in section 7.1.2. (see: https://ref.gs1.org/standards/genspecs/)
+                //
+                //                   2024         2074
+                //     ----------------|------------]------->
+                //
+                //   In 2024, the horizon for 21th century is 2074
+                //     
+                //   Example: 
+                //     If 2-digits year is 78 -> 1978 (closer to 2024 than 2078)
+                if (yearGap >= 51) {
+                    yearAsNumber = yearAsNumber + currentCentury - 100;
+                } else if (yearGap <= -50) {
+                    yearAsNumber = yearAsNumber + currentCentury + 100;
                 } else {
-                    yearAsNumber = yearAsNumber + 2000;
-                }
+                    yearAsNumber = yearAsNumber + currentCentury;
+                }                 
 
                 if (dayAsNumber > 0) {
                     // Dates in Javascript are funny. Months start at 0. Days, on the other
