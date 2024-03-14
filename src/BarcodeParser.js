@@ -451,7 +451,7 @@ const parseBarcode = (function () {
                     // Packaging Date (YYMMDD)
                     parseDate("13", "PACK DATE");
                     break;
-                    // AI "14" isn't defined
+                // AI "14" isn't defined
                 case "5":
                     // Best Before Date (YYMMDD)
                     parseDate("15", "BEST BEFORE or BEST BY");
@@ -482,7 +482,10 @@ const parseBarcode = (function () {
                     // Consumer product variant
                     parseVariableLength("22", "CPV");
                     break;
-                    // AI 23 is not defined
+                // AI 23 is not defined
+
+                // TODO: #235 - Third Party Controlled, Serialised Extension of Global Trade Item Number (GTIN) (TPX)
+                //       format: 	N3+X..28
                 case "4":
                     // from now, the third number matters:
                     thirdNumber = codestring.slice(2, 3);
@@ -519,7 +522,7 @@ const parseBarcode = (function () {
                         // Reference to Source Entity
                         parseVariableLength("251", "REF. TO SOURCE");
                         break;
-                        // AI "252" isn't defined
+                    // AI "252" isn't defined
                     case "3":
                         // Global Document Type Identifier (GDTI)
                         parseVariableLength("253", "GDTI");
@@ -536,7 +539,7 @@ const parseBarcode = (function () {
                         throw "04";
                     }
                     break;
-                    // AI "26" to "29" aren't defined
+                // AI "26" to "29" aren't defined
                 default:
                     throw "05";
                 }
@@ -823,7 +826,7 @@ const parseBarcode = (function () {
                     // Count of Trade Items
                     parseVariableLength("37", "COUNT");
                     break;
-                    // AI "38" isn't defined
+                // AI "38" isn't defined
                 case "9":
                     // third and fourth numbers matter:
                     thirdNumber = codestring.slice(2, 3);
@@ -846,6 +849,11 @@ const parseBarcode = (function () {
                         // Applicable Amount Payable with ISO Currency Code (Variable Measure Trade Item)
                         parseVariableLengthWithISONumbers("393", fourthNumber, "PRICE");
                         break;
+
+                    // TODO: #394n - Percentage discount of a coupon
+                    //       format: N4+N4  [last digit is the number of decimals]
+                    // TODO: #395n - Amount Payable per unit of measure single monetary area (variable measure trade item)
+                    //       format: N4+N6  [last digit is the number of decimals]
                     default:
                         throw "12";
                     }
@@ -961,11 +969,14 @@ const parseBarcode = (function () {
                         throw "16";
                     }
                     break;
+                  
+                // TODO: #43xy - Ship-To / Return-to / Authority, Signature, ... / Temperatures
+                  
                 default:
                     throw "17";
                 }
                 break;
-                // first digits 5 and 6 are not used
+            // first digits 5 and 6 are not used
             case "7":
                 switch (secondNumber) {
                 case "0":
@@ -995,6 +1006,9 @@ const parseBarcode = (function () {
                         default:
                             throw "18";
                         }
+                        
+                        // TODO: range #7005-7021
+                      
                         break;
                         // 1 and 2 are not used
                     case "3":
@@ -1007,6 +1021,9 @@ const parseBarcode = (function () {
                     default:
                         throw "19";
                     }
+
+                    // TODO: #7040 - Amount Payable per unit of measure single monetary area (variable measure trade item)
+                    //       format N4+N1+X3
                     break;
                 case "1":
                     thirdNumber = codestring.slice(2, 3);
@@ -1027,10 +1044,18 @@ const parseBarcode = (function () {
                         // National Healthcare Reimbursement Number (NHRN) – Brasil DRN
                         parseVariableLength("713", "NHRN DRN");
                         break;
+                    // TODO: #714 - NHRN PT
+                    // TODO: #715 - NHRN US NDC                      
                     default:
                         throw "20";
                     }
                     break;
+
+                // TODO: #723n - Certification reference
+                // TODO: #7240 - Protocol ID
+                // TODO: #7241 - AIDC media type            
+                // TODO: #7242 - Version Control Number (VCN)
+                  
                 default:
                     throw "21";
                 }
@@ -1076,6 +1101,8 @@ const parseBarcode = (function () {
                             // Date and Time of Production
                             parseVariableLength("8008", "PROD TIME"); // should be exactly 12 digits long
                             break;
+
+                        // TODO: #8009 - Optically Readable Sensor Indicator
                         default:
                             throw "22";
                         }
@@ -1090,6 +1117,10 @@ const parseBarcode = (function () {
                             // Component / Part Identifier Serial Number (CPID SERIAL)
                             parseVariableLength("8011", "CPID SERIAL");
                             break;
+                        
+                        // TODO: #8012 - Software version
+                        // TODO: #8013 - Global Model Number
+  
                         case "7":
                             // Global Service Relation Number to identify the relationship between an organisation offering services and the provider of services
                             parseVariableLength("8017", "GSRN - PROVIDER"); // should be 18 digits long
@@ -1112,10 +1143,16 @@ const parseBarcode = (function () {
                             // Payment Slip Reference Number
                             parseVariableLength("8020", "REF No");
                             break;
+
+                        // TODO: #8026 - Identiifcation of pieces of a trade item
+  
                         default:
                             throw "24";
                         }
                         break;
+
+                    // TODO: #8030 - Digital Signature
+
                     default:
                         throw "25";
                     }
