@@ -482,10 +482,16 @@ const parseBarcode = (function () {
                     // Consumer product variant
                     parseVariableLength("22", "CPV");
                     break;
-                // AI 23 is not defined
-
-                // TODO: #235 - Third Party Controlled, Serialised Extension of Global Trade Item Number (GTIN) (TPX)
-                //       format: 	N3+X..28
+                case "3":
+                    // from now, the third number matters:
+                    thirdNumber = codestring.slice(2, 3);
+                    switch (thirdNumber) {
+                    case "5":
+                        // Third Party Controlled, Serialised Extension of Global Trade Item Number (GTIN) (TPX)
+                        parseVariableLength("235", "TPX");
+                        break;
+                    }
+                    break;
                 case "4":
                     // from now, the third number matters:
                     thirdNumber = codestring.slice(2, 3);
@@ -849,11 +855,14 @@ const parseBarcode = (function () {
                         // Applicable Amount Payable with ISO Currency Code (Variable Measure Trade Item)
                         parseVariableLengthWithISONumbers("393", fourthNumber, "PRICE");
                         break;
-
-                    // TODO: #394n - Percentage discount of a coupon
-                    //       format: N4+N4  [last digit is the number of decimals]
-                    // TODO: #395n - Amount Payable per unit of measure single monetary area (variable measure trade item)
-                    //       format: N4+N6  [last digit is the number of decimals]
+                    case "4":
+                        // Percentage discount of a coupon
+                        parseVariableLengthMeasure("394", fourthNumber, "COUPON DISCOUNT", "PRCNT OFF");
+                        break;
+                    case "5":
+                        // Amount Payable per unit of measure single monetary area (variable measure trade item)
+                        parseVariableLengthMeasure("395", fourthNumber, "AMOUNT PAYABLE", "PRICE/UoM");
+                        break;
                     default:
                         throw "12";
                     }
@@ -970,7 +979,159 @@ const parseBarcode = (function () {
                     }
                     break;
                   
-                // TODO: #43xy - Ship-To / Return-to / Authority, Signature, ... / Temperatures
+                case "3":
+                    //third and fourth number matter:
+                    thirdNumber = codestring.slice(2, 3);
+                    fourthNumber = codestring.slice(3, 4);
+
+                    switch (thirdNumber) {
+                    case "0":
+                        switch (fourthNumber) {
+                        case "0":
+                            // Ship-to - Deliver-to Company name
+                            parseVariableLength("4300", "SHIP TO COMP");
+                            break;
+                        case "1":
+                            // Ship-to - Deliver-to contact name
+                            parseVariableLength("4301", "SHIP TO NAME");
+                            break;
+                        case "2":
+                            // Ship-to - Deliver-to address line 1
+                            parseVariableLength("4302", "SHIP TO ADD1");
+                            break;
+                        case "3":
+                            // Ship-to - Deliver-to address line 2
+                            parseVariableLength("4303", "SHIP TO ADD2");
+                            break;                                                            
+                        case "4":
+                            // Ship-to - Deliver-to suburb
+                            parseVariableLength("4304", "SHIP TO SUB");
+                            break;                                                            
+                        case "5":
+                            // Ship-to - Deliver-to locality
+                            parseVariableLength("4305", "SHIP TO LOC");
+                            break;                                                            
+                        case "6":
+                            // Ship-to - Deliver-to region
+                            parseVariableLength("4306", "SHIP TO REG");
+                            break;                                                            
+                        case "7":
+                            // Ship-to - Deliver-to country code
+                            parseFixedLength("4307", "SHIP TO COUNTRY", 2);
+                            break;                                                            
+                        case "8":
+                            // Ship-to - Deliver-to telephone number
+                            parseVariableLength("4308", "SHIP TO PHONE");
+                            break;                                                            
+                        case "9":
+                            // Ship-to - Deliver-to GEO location
+                            parseFixedLength("4309", "SHIP TO GEO", 20);
+                            break;                                                            
+                        }
+                        break;
+                    
+                    case "1":
+                        switch (fourthNumber) {
+                        case "0":
+                            // Return-to company name
+                            parseVariableLength("4310", "RTN TO COMP");
+                            break;
+                        case "1":
+                            // Return-to contact name
+                            parseVariableLength("4311", "RTN TO NAME");
+                            break;
+                        case "2":
+                            // Return-to address line 1
+                            parseVariableLength("4312", "RTN TO ADD1");
+                            break;
+                        case "3":
+                            // Return-to address line 2
+                            parseVariableLength("4313", "RTN TO ADD2");
+                            break;                                                            
+                        case "4":
+                            // Return-to suburb
+                            parseVariableLength("4314", "RTN TO SUB");
+                            break;                                                            
+                        case "5":
+                            // Return-to locality
+                            parseVariableLength("4315", "RTN TO LOC");
+                            break;                                                            
+                        case "6":
+                            // Return-to region
+                            parseVariableLength("4316", "RTN TO REG");
+                            break;                                                            
+                        case "7":
+                            // Return-to country code
+                            parseFixedLength("4317", "RTN TO COUNTRY", 2);
+                            break;                                                            
+                        case "8":
+                            // Return-to postal code
+                            parseVariableLength("4318", "RTN TO POST");
+                            break;                                                            
+                        case "9":
+                            // Return-to telephone number 
+                            parseVariableLength("4319", "RTN TO PHONE");
+                            break;                                                            
+                        }
+                        break;
+
+                    case "2":
+                        switch (fourthNumber) {
+                        case "0":
+                            // Service code description
+                            parseVariableLength("4320", "SRV DESCRIPTION");
+                            break;
+                        case "1":
+                            // Dangerous goods flag
+                            parseFixedLength("4321", "DANGEROUS GOODS", 1);
+                            break;
+                        case "2":
+                            // 	Authority to leave
+                            parseFixedLength("4322", "AUTH LEAVE", 1);
+                            break;
+                        case "3":
+                            // Signature required flag
+                            parseFixedLength("4323", "SIG REQUIRED", 1);
+                            break;
+                        case "4":
+                            // Not before delivery date time
+                            parseVariableLength("4324", "NBEF DEL DT");
+                            break;
+                        case "5":
+                            // Not after delivery date time
+                            parseVariableLength("4325", "NAFT DEL DT");
+                            break;
+                        case "6":
+                            // Release date
+                            parseDate("4326", "REL DATE");
+                            break;
+                        }
+                        break;
+
+                    case "3":
+                        switch (fourthNumber) {
+                        case "0":
+                            // Maximum temperature in Fahrenheit
+                            parseVariableLength("4330", "MAX TEMP F");
+                            break;
+                        case "1":
+                            // Maximum temperature in Celsius
+                            parseVariableLength("4331", "MAX TEMP C");
+                            break;
+                        case "2":
+                            // Minimum temperature in Fahrenheit
+                            parseVariableLength("4332", "MIN TEMP F");
+                            break;
+                        case "3":
+                            // Minimum temperature in Celsius
+                            parseVariableLength("4333", "MIN TEMP C");
+                            break;
+                        }
+                        break;
+                            
+                    default:
+                        throw "16";
+                    }
                   
                 default:
                     throw "17";
@@ -1003,14 +1164,63 @@ const parseBarcode = (function () {
                             // Active Potency
                             parseVariableLength("7004", "ACTIVE POTENCY");
                             break;
+                        case "5":
+                            // Catch area
+                            parseVariableLength("7005", "CATCH AREA");
+                            break;
+                        case "6":
+                            // First freeze date
+                            parseDate("7006", "FIRST FREEZE DATE");
+                            break;
+                        case "7":
+                            // Harvest date
+                            parseDate("7007", "HARVEST DATE");
+                            break;
+                        case "8":
+                            // Species for fishery purposes
+                            parseVariableLength("7008", "AQUATIC SPECIES");
+                            break;
+                        case "9":
+                            // Fishing gear type
+                            parseVariableLength("7009", "FISHING GEAR TYPE");
+                            break;
                         default:
                             throw "18";
                         }
-                        
-                        // TODO: range #7005-7021
-                      
+                        break;      
+                    case "1":
+                        switch (fourthNumber) {
+                        case "0":
+                            // Production method
+                            parseVariableLength("7010", "PROD METHOD");
+                            break;
+                        }
+                        case "1":
+                            // Test by date (and optional time)
+                            parseVariableLength("7011", "TEST BY DATE");
+                            break;
+                        }
                         break;
-                        // 1 and 2 are not used
+                    case "2":
+                        switch (fourthNumber) {
+                        case "0":
+                            // Refurbishment lot ID
+                            parseVariableLength("7020", "REFURB LOT");
+                            break;
+                        case "1":
+                            // Functional status
+                            parseVariableLength("7021", "FUNC STAT");
+                            break;
+                        case "2":
+                            // Revision status
+                            parseVariableLength("7022", "REV STAT");
+                            break;
+                        case "3":
+                            // Global Individual Asset Identifier (GIAI) of an assembly
+                            parseVariableLength("7023", "GIAI - ASSEMBLY");
+                            break;
+                        }                                              
+                        break;
                     case "3":
                         // Approval Number of Processor with ISO Country Code
 
@@ -1018,13 +1228,20 @@ const parseBarcode = (function () {
 
                         parseVariableLengthWithISOChars("703" + fourthNumber, "PROCESSOR # " + fourthNumber);
                         break;
+                    case "4":
+                        switch (fourthNumber) {
+                        case "0":
+                            // GS1 UIC with Extension 1 and Importer index
+                            parseFixedLength("7040", "UIC+EXT", 4);
+                            break;
+                        }
+                        break;
+
                     default:
                         throw "19";
                     }
-
-                    // TODO: #7040 - Amount Payable per unit of measure single monetary area (variable measure trade item)
-                    //       format N4+N1+X3
                     break;
+
                 case "1":
                     thirdNumber = codestring.slice(2, 3);
                     switch (thirdNumber) {
@@ -1044,18 +1261,45 @@ const parseBarcode = (function () {
                         // National Healthcare Reimbursement Number (NHRN) – Brasil DRN
                         parseVariableLength("713", "NHRN DRN");
                         break;
-                    // TODO: #714 - NHRN PT
-                    // TODO: #715 - NHRN US NDC                      
+                    case "4":
+                        // National Healthcare Reimbursement Number (NHRN) - Portugal AIM
+                        parseVariableLength("714", "NHRN PT");
+                        break;
+                    case "5":
+                        // National Healthcare Reimbursement Number (NHRN) - United States of America NDC
+                        parseVariableLength("715", "NHRN NDC");
+                        break;
                     default:
                         throw "20";
                     }
                     break;
 
-                // TODO: #723n - Certification reference
-                // TODO: #7240 - Protocol ID
-                // TODO: #7241 - AIDC media type            
-                // TODO: #7242 - Version Control Number (VCN)
-                  
+                case "2":
+                    //third and fourth number matter:
+                    thirdNumber = codestring.slice(2, 3);
+                    fourthNumber = codestring.slice(3, 4);
+
+                    switch (thirdNumber) {
+                    // 0, 1 and 2 are unused
+                    case "3":
+                        // Certification reference
+                        parseVariableLength("723" + fourthNumber, "CERT # " + fourthNumber);
+                        break;
+                    case "4":
+                        switch (fourthNumber) {
+                        case "0":
+                            // Protocol ID
+                            parseVariableLength("7240", "PROTOCOL");
+                            break;
+                        case "1":
+                            // AIDC media type
+                            parseFixedLength("7241", "AIDC MEDIA TYPE", 2);
+                            break;
+                        case "2":
+                            // Version Control Number (VCN)
+                            parseVariableLength("7242", "VCN");
+                            break;
+                        }
                 default:
                     throw "21";
                 }
@@ -1101,8 +1345,10 @@ const parseBarcode = (function () {
                             // Date and Time of Production
                             parseVariableLength("8008", "PROD TIME"); // should be exactly 12 digits long
                             break;
-
-                        // TODO: #8009 - Optically Readable Sensor Indicator
+                        case "9":
+                            // Optically Readable Sensor Indicator
+                            parseVariableLength("8009", "OPTSEN");
+                            break;
                         default:
                             throw "22";
                         }
@@ -1117,10 +1363,17 @@ const parseBarcode = (function () {
                             // Component / Part Identifier Serial Number (CPID SERIAL)
                             parseVariableLength("8011", "CPID SERIAL");
                             break;
-                        
-                        // TODO: #8012 - Software version
-                        // TODO: #8013 - Global Model Number
-  
+                        case "2":
+                            // Software version
+                            parseVariableLength("8012", "VERSION");
+                            break;
+                        case "3":
+                            // Global Model Number (GMN)
+                            parseVariableLength("8013", "GMN");
+                            break;
+
+                        // 4, 5 and 6 are unused
+
                         case "7":
                             // Global Service Relation Number to identify the relationship between an organisation offering services and the provider of services
                             parseVariableLength("8017", "GSRN - PROVIDER"); // should be 18 digits long
@@ -1144,14 +1397,25 @@ const parseBarcode = (function () {
                             parseVariableLength("8020", "REF No");
                             break;
 
-                        // TODO: #8026 - Identiifcation of pieces of a trade item
-  
+                        // 1, 2, 3, 4 and 5 are unused
+
+                        case "6":
+                            // Identification of pieces of a trade item (ITIP) contained in a logistic unit
+                            parseFixedLength("8026", "ITIP CONTENT", 14 + 2 + 2);
+                            break;  
                         default:
                             throw "24";
                         }
                         break;
 
-                    // TODO: #8030 - Digital Signature
+                    case "3":
+                        switch (fourthNumber) {
+                        case "0":
+                            // Digital Signature (DigSig)
+                            parseVariableLength("8030", "DIGSIG");
+                            break;
+                        }
+                        break;
 
                     default:
                         throw "25";
