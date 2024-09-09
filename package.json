@@ -1,6 +1,6 @@
 {
   "name": "gs1-barcode-parser-mod",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "The barcode parser is a library for handling the contents of GS1 barcodes.",
   "main": "src/BarcodeParser.js",
   "scripts": {
