@@ -24,7 +24,7 @@ describe("A parsed GS1 barcode", () => {
         expect(result.parsedCodeItems).toEqual(jasmine.arrayContaining([jasmine.objectContaining({
             ai: "17",
             dataTitle: "USE BY OR EXPIRY",
-            data: new Date(2015, 0, 29, 0, 0, 0, 0)
+            data: new Date('2015-01-29')
         })]));
     });
 
@@ -93,7 +93,16 @@ describe("A parsed GS1 barcode", () => {
         expect(result.parsedCodeItems).toEqual(jasmine.arrayContaining([jasmine.objectContaining({
             ai: "17",
             dataTitle: "USE BY OR EXPIRY",
-            data: new Date(2019, 4, 31, 0, 0, 0, 0)
+            data: new Date('2019-05-31')
         })]));
+    });
+});
+
+describe("Date fields of a parsed GS1 barcode", () => {
+    it("should consider the timezone offset", () => {
+        const barcode = "15230300";
+        const result = parseBarcode(barcode);
+
+        expect(result.parsedCodeItems[0].data.toISOString()).toEqual('2023-03-31T00:00:00.000Z');
     });
 });
