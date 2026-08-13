@@ -6,7 +6,7 @@ Notable changes to `gs1-barcode-parser-mod`. The format follows
 
 Releases before 1.0.3 predate this file and are not reconstructed here.
 
-## Unreleased
+## 1.1.0 - 2026-08-13
 
 ### Added
 
