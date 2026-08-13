@@ -12,6 +12,7 @@
   "scripts": {
     "lint": "jshint src spec",
     "test": "npm run lint && jasmine",
+    "coverage": "c8 jasmine",
     "build": "terser src/BarcodeParser.js --compress --mangle --output dist/gs1-barcode-parser-mod.min.js"
   },
   "repository": {
@@ -31,6 +32,7 @@
   },
   "homepage": "https://github.com/MaximBelov/BarcodeParser",
   "devDependencies": {
+    "c8": "^12.0.0",
     "jasmine": "^5.5.0",
     "jshint": "^2.13.6",
     "terser": "^5.37.0"

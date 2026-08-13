@@ -24,6 +24,9 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm test
+      # This job does not depend on CI having passed, so it repeats the same
+      # gates rather than trusting that something else ran them.
+      - run: npm run coverage
       - run: npm run build
 
       # Every push to master reaches this job, but only a release commit changes the

@@ -22,4 +22,37 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm test
+
+      # Fails the build when coverage drops below the thresholds in .c8rc.json,
+      # so a change which adds a branch nobody exercises does not pass quietly.
+      #
+      # "shell: bash" is load-bearing: it adds pipefail, and without it the exit
+      # code of this step is tee's rather than c8's, so a coverage failure would
+      # be reported as a green step.
+      - name: Coverage
+        shell: bash
+        run: npm run coverage 2>&1 | tee coverage.log
+
+      # The table is worth having in front of you without downloading anything;
+      # the browsable HTML report is the artifact below.
+      - name: Report coverage in the job summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo '## Coverage'
+            echo ''
+            echo '```'
+            cat coverage.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the coverage report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage
+          path: coverage/
+          retention-days: 14
+
       - run: npm run build
