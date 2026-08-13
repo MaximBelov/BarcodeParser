@@ -7,7 +7,7 @@ Forked from [upstream](https://github.com/PeterBrockfeld/BarcodeParser), whose `
 Published as [`gs1-barcode-parser-mod`](https://www.npmjs.com/package/gs1-barcode-parser-mod).
 
 Changes from upstream:
-- Covers 205 application identifiers against upstream's 134; the 41x, 43x, 70xx, 71x, 72xx, 725x, 80xx and 82xx families were added since the fork point.
+- Covers 226 application identifiers against upstream's 143; the 41x, 43x, 70xx, 71x, 72xx, 725x, 80xx and 82xx families were added since the fork point.
 - Reads the person related identifiers used in healthcare (7250-7259), whose dates carry a four digit year rather than the two digit year of the older date elements.
 - Resolves a two digit year with the sliding window from section 7.1.2 of the GS1 General Specifications, relative to the current year, instead of upstream's fixed "51-99 belongs to the 20th century" rule.
 - Exports `parseBarcode` as a CommonJS module rather than leaving it a browser global, so it can be `require`d.
@@ -135,7 +135,7 @@ The function returns an object containing two elements:
 * `codeName`: a barcode type identifier (a simple string denoting the type of barcode) and
 * `parsedCodeItems`: an array of objects, each with these attributes:
  * `ai`: the application identifier
- * `title`: the title of the element, i.e. a short description
+ * `dataTitle`: the title of the element, i.e. a short description
  * `data`: the contents, either a string, a number or a date
  * `unit`: the unit of measurement, a country code, a currency; denoted in ISO codes.
  * `raw`: the untouched substring the contents were read from
@@ -150,11 +150,11 @@ reader sits. An element carrying a time of day puts that there too: `"1985-06-30
 From the example above: `parseBarcode()` will return an object with "GS1-128" in its attribute `codeName`, the fourth element of `parsedCodeItems` is an object which has the attributes
 
 * "3932" as `ai`,
-* "PRICE" as `title`,
+* "PRICE" as `dataTitle`,
 * "47.11" as `data` (a floating point number) and
 * "978" as `unit` (the ISO code for €)
 
-Some remarks about how the function works can be found in `README_scripts.md` within the `scripts` folder.
+Some remarks about how the function works can be found in `README_scripts.md` within the `src` folder.
 
 ### Limitations
 
@@ -229,8 +229,10 @@ npm test          # lint, then the spec suite
 npm run build     # minified build into dist/
 ```
 
-`spec/ApplicationIdentifiersSpec.js` parses every application identifier the library
-claims to support and checks each one comes back under its own AI. The parser is a
+`spec/ApplicationIdentifiersSpec.js` holds a table of 208 application identifiers and
+checks each one comes back under its own AI. Identifiers whose last digit only says how
+many decimals follow, `310x` and its like, are represented by one entry rather than all
+ten, which is why the table is shorter than the 226 the parser accepts. The parser is a
 single large nested `switch`, where a missing `break` makes an identifier throw, return
 `undefined`, or silently parse as its neighbour — so an identifier added without being
 wired up correctly fails the suite rather than shipping.
