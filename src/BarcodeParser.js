@@ -1850,14 +1850,14 @@ const parseBarcode = (function () {
                     throw "invalid number";
                 case "37":
                     throw "truncated fixed length element";
-                case "38":
-                    throw "bracketed AI does not match the parsed element";
                 default:
                     throw "unknown error";
                 }
             }
         }
 
+        // This runs after the loop, so its error never reaches the switch above:
+        // "38" is translated here instead, and has no arm there.
         if (declaredAIs.length > 0) {
             try {
                 checkDeclaredAIs(declaredAIs, answer.parsedCodeItems);
