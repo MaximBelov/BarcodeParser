@@ -40,6 +40,7 @@ const parseBarcode = (function () {
             symbologyIdentifier = barcode
               .replace(fncChar,'')
               .slice(0, 3),
+            declaredAIs = [], // the AIs written between parentheses, if any
             firstElement = {};
 
         //auxilliary functions
@@ -1545,6 +1546,96 @@ const parseBarcode = (function () {
          */
 
         /**
+         *
+         * ====== BEGIN of the human readable element string ======
+         *
+         * Element strings are usually printed underneath the barcode
+         * with their AIs wrapped in parentheses, e.g.
+         *
+         *     (01)04012345678901(17)261230(10)ABC123
+         *
+         * That's the "human readable interpretation" of the code. Quite
+         * a few scanners hand it over in that shape, and it's the shape
+         * people type in, so the parser accepts it too. It is rewritten
+         * into the FNC1 separated form and parsed by the very same AI
+         * switch as everything else.
+         */
+
+        /**
+         * matches a parenthesised AI at the beginning of a string. AIs
+         * consist of two to four digits, so an opening parenthesis
+         * followed by anything else is data and is left alone.
+         */
+        var parenthesisedAI = /^\((\d{2,4})\)/;
+
+        /**
+         * rewrites the human readable form into the form the parser
+         * works on: every parenthesised AI opens a new element, so it
+         * is prefixed with an FNC1 and its parentheses are removed. The
+         * first AI gets no FNC1, there's no preceding element it could
+         * be separated from.
+         *
+         * Parentheses which don't enclose an AI are part of the data
+         * and are kept as they are.
+         *
+         * @param   {String} elementString the human readable element string
+         * @returns {String} the same elements, separated by FNC1
+         */
+        function expandParenthesisedElementString(elementString, declaredAIs) {
+            var expanded = "",
+                rest = elementString,
+                foundAI = null;
+
+            while (rest.length > 0) {
+                foundAI = parenthesisedAI.exec(rest);
+                if (foundAI === null) {
+                    expanded = expanded + rest.slice(0, 1);
+                    rest = rest.slice(1, rest.length);
+                } else {
+                    if (expanded.length > 0) {
+                        expanded = expanded + fncChar;
+                    }
+                    expanded = expanded + foundAI[1];
+                    declaredAIs.push(foundAI[1]);
+                    rest = rest.slice(foundAI[0].length, rest.length);
+                }
+            }
+
+            return expanded;
+        }
+
+        /**
+         * The parentheses say where each AI ends, but the AI switch works it
+         * out from the digits alone and takes the shortest one that matches.
+         * The two can disagree: "(017)250630" writes a three digit AI, while
+         * the switch reads AI "01" and hands it "7250630" as data.
+         *
+         * Nothing downstream would notice, so the AIs the parser settled on
+         * are compared against the ones that were actually bracketed.
+         *
+         * @param {String[]} declaredAIs   the AIs found between parentheses
+         * @param {Object[]} parsedItems   the elements the parser produced
+         */
+        function checkDeclaredAIs(declaredAIs, parsedItems) {
+            var index = 0;
+
+            if (parsedItems.length !== declaredAIs.length) {
+                throw "38";
+            }
+            for (index = 0; index < declaredAIs.length; index += 1) {
+                if (parsedItems[index].ai !== declaredAIs[index]) {
+                    throw "38";
+                }
+            }
+        }
+
+        /**
+         *
+         * ====== END of the human readable element string ======
+         *
+         */
+
+        /**
          * =========== BEGIN of main routine ===================
          */
 
@@ -1591,6 +1682,29 @@ const parseBarcode = (function () {
             answer.codeName = "";
             restOfBarcode = barcode;
             break;
+        }
+
+        /**
+         *
+         * ==== Step in between: ====
+         *
+         * IF what's left is the human readable element string, i.e. it
+         * starts with an AI in parentheses,
+         *   rewrite it into the FNC1 separated form;
+         *   name it, unless a symbology identifier already did;
+         *
+         * The two compose: a code may well arrive as
+         * "]C1(01)04012345678901". The symbology identifier wins the
+         * naming in that case, because it says which symbology the data
+         * came from, while the parentheses only say how it was written
+         * down.
+         */
+
+        if (parenthesisedAI.test(restOfBarcode)) {
+            restOfBarcode = expandParenthesisedElementString(restOfBarcode, declaredAIs);
+            if (answer.codeName === "") {
+                answer.codeName = "GS1 Element String (HRI)";
+            }
         }
 
         /**
@@ -1702,9 +1816,19 @@ const parseBarcode = (function () {
                     throw "invalid day in date";
                 case "36":
                     throw "invalid number";
+                case "38":
+                    throw "bracketed AI does not match the parsed element";
                 default:
                     throw "unknown error";
                 }
+            }
+        }
+
+        if (declaredAIs.length > 0) {
+            try {
+                checkDeclaredAIs(declaredAIs, answer.parsedCodeItems);
+            } catch (eAI) {
+                throw "bracketed AI does not match the parsed element";
             }
         }
         /**

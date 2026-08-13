@@ -76,6 +76,18 @@ The GS1 barcode is started by a *symbology identifier*; a three character sequen
 
 The BarcodeParser takes this string and decomposes it into its single elements.
 
+### The human readable form
+
+The same elements are printed underneath the barcode with their AIs wrapped in parentheses instead of being separated by FNC1s:
+
+    (01)04012345678901(17)261230(10)ABC123
+
+That's the "human readable interpretation" of the code. `parseBarcode()` takes it as well and returns the same elements it returns for the scanned form. It is recognised by the very beginning of the string: an opening parenthesis, two to four digits, a closing parenthesis. Data which merely happens to contain a parenthesis is parsed as before.
+
+A symbology identifier may precede it, e.g. `]C1(01)04012345678901`. Both are then applied: the parentheses are resolved and the symbology identifier still sets `codeName`, because it names the symbology the data came from, while the parentheses only say how it was written down. Without a symbology identifier `codeName` becomes "GS1 Element String (HRI)".
+
+Note that a parenthesis within the data can't be told apart from one enclosing an AI. A data content of "(01)" is read as an AI, whatever the standard says about the character set. That's a property of the printed form itself, not of this parser.
+
 ### Use case
 
 You have a JavaScript application which takes barcodes in one of the GS1-formats. The conversion barcode → string has been made by a barcode scanning device or some other application. You got a string looking somehow like that:
