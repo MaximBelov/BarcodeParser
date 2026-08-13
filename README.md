@@ -235,10 +235,19 @@ exercises fails rather than passing quietly.
 there for editors and other tools. Neither is checked in. Every CI run prints the table
 in its job summary and attaches the HTML report as an artifact.
 
-Two areas are still uncovered: the switch which turns an internal error code into its
-message, and every symbology identifier other than `]C1`, which is the only one the specs
-use. Both are reachable and worth specs; the thresholds are set to today's numbers so they
-can only go up.
+What is left uncovered is code which cannot be reached, rather than code nobody got round
+to:
+
+- the `catch` arms around `parseInt` and `parseFloat`, neither of which throws, and the
+  messages they map to;
+- the `default` arm of the element type switch, since every caller passes a known type;
+- the `default` arm of the message switch, since every code in use has an arm of its own;
+- the half of the sliding year window which reads a year as belonging to the century ahead.
+  It needs a two digit year at least fifty behind the current one, which cannot be written
+  in two digits before 2050.
+
+Deleting unreachable code would be a change to the parser rather than to its specs, so it
+is left alone and written down here instead.
 
 CI runs the same commands on every push and pull request. A push to `master` whose
 `package.json` version is not yet on the registry is published to npm through

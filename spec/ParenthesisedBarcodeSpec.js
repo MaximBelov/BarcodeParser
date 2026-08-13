@@ -136,6 +136,14 @@ describe("A parenthesised barcode whose AI does not survive parsing", () => {
     it("is rejected when only one of several AIs is wrong", () => {
         expect(() => parseBarcode("(01)04012345678901(213)XYZ")).toThrow(mismatchError);
     });
+
+    it("is rejected when the elements outnumber the bracketed AIs", () => {
+        // A group separator pasted into the human readable form opens an element
+        // the parentheses never announced, so the two counts stop agreeing.
+        const fncChar = String.fromCharCode(29);
+
+        expect(() => parseBarcode(`(10)AB${fncChar}21XYZ`)).toThrow(mismatchError);
+    });
 });
 
 describe("A parenthesised barcode which isn't an element string at all", () => {

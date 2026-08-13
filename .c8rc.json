@@ -10,8 +10,8 @@
     ],
     "report-dir": "coverage",
     "check-coverage": true,
-    "statements": 93,
-    "branches": 76,
+    "statements": 99,
+    "branches": 97,
     "functions": 100,
-    "lines": 93
+    "lines": 99
 }
