@@ -1,3 +1,5 @@
+const { parseBarcode } = require("../src/BarcodeParser");
+
 describe("A parsed GS1 barcode", () => {
     let result;
 

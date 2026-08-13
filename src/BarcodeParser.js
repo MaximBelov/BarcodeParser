@@ -1132,7 +1132,7 @@ const parseBarcode = (function () {
                     default:
                         throw "16";
                     }
-                  
+                    break;
                 default:
                     throw "17";
                 }
@@ -1194,7 +1194,6 @@ const parseBarcode = (function () {
                             // Production method
                             parseVariableLength("7010", "PROD METHOD");
                             break;
-                        }
                         case "1":
                             // Test by date (and optional time)
                             parseVariableLength("7011", "TEST BY DATE");
@@ -1300,6 +1299,9 @@ const parseBarcode = (function () {
                             parseVariableLength("7242", "VCN");
                             break;
                         }
+                        break;
+                    }
+                    break;
                 default:
                     throw "21";
                 }
