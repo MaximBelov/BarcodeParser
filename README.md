@@ -1,8 +1,19 @@
-# JavaScript GS1 barcode parser
+# JavaScript GS1 barcode parser ![CI](https://github.com/MaximBelov/BarcodeParser/actions/workflows/ci.yml/badge.svg?branch=master)
 
-**IMPORTANT**: this is a fork of Peter Brockfeld's [original repository](https://github.com/PeterBrockfeld/BarcodeParser).
+## Why this fork exists
 
-**IMPORTANT**: [active fork](https://github.com/MaximBelov/BarcodeParser).
+Forked from [upstream](https://github.com/PeterBrockfeld/BarcodeParser), whose `master` has had no commit since February 2015 and whose pull requests have been open since 2018. This fork is where the library is still maintained.
+
+Published as [`gs1-barcode-parser-mod`](https://www.npmjs.com/package/gs1-barcode-parser-mod).
+
+Changes from upstream:
+- Covers 193 application identifiers against upstream's 134; the 41x, 43x, 70xx, 71x, 72xx, 80xx and 82xx families were added since the fork point.
+- Resolves a two digit year with the sliding window from section 7.1.2 of the GS1 General Specifications, relative to the current year, instead of upstream's fixed "51-99 belongs to the 20th century" rule.
+- Exports `parseBarcode` as a CommonJS module rather than leaving it a browser global, so it can be `require`d.
+- Adds a `raw` property to every parsed element, holding the untouched substring it was read from.
+- Strips only the first group separator when normalising a scanned code, which fixes parsing of remedy QR codes.
+- Handles a date whose day part is `00`, turning it into the last day of that month.
+- Moves the library from `scripts/` to `src/` and adds a spec suite that parses every supported application identifier.
 
 https://www.gs1.org/docs/barcodes/GS1_DataMatrix_Guideline.pdf
 
@@ -86,7 +97,7 @@ You want to extract some data out of the scanned code, e.g. the lot/batch number
 
 ## How to use it
 
-The library is located in the `src` directory in its uncompressed form. There is also a version minified with the `uglifyjs` tool (see https://github.com/mishoo/UglifyJS2) in the `dist` directory.
+The library is located in the `src` directory in its uncompressed form. `npm run build` writes a minified version to the `dist` directory, which is not checked in.
 
 Load the library into your application:
 
@@ -183,6 +194,25 @@ As an example the directory `Barcodes` contains five barcodes, three of them con
 The other two just contain three characters: "1", the "&lt;GS&gt;" group separator and "3". They can be used to find out what *your* scanner sends when it encounters a "&lt;GS&gt;" in a barcode.
 
 You can print them using the "ExamplesForBarcode.pdf".
+
+## Development
+
+```bash
+npm install
+npm test          # lint, then the spec suite
+npm run build     # minified build into dist/
+```
+
+`spec/ApplicationIdentifiersSpec.js` parses every application identifier the library
+claims to support and checks each one comes back under its own AI. The parser is a
+single large nested `switch`, where a missing `break` makes an identifier throw, return
+`undefined`, or silently parse as its neighbour — so an identifier added without being
+wired up correctly fails the suite rather than shipping.
+
+CI runs the same commands on every push and pull request. A push to `master` whose
+`package.json` version is not yet on the registry is published to npm through
+[Trusted Publishing](https://docs.npmjs.com/trusted-publishers); a push that does not
+change the version is a no-op.
 
 ## License
 
