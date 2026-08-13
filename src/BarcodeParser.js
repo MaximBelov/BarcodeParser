@@ -73,9 +73,14 @@ const parseBarcode = (function () {
                 this.data = new Date();
                 this.data.setHours(0, 0, 0, 0);
                 break;
+            /* c8 ignore start -- every construction in this file passes S, N or
+               D, so this arm cannot be reached. It stays as the guard it is,
+               and is kept out of the coverage figure rather than being dropped
+               to flatter it. */
             default:
                 this.data = "";
                 break;
+            /* c8 ignore stop */
             }
             this.unit = ""; // some elements are accompaigned by an unit of
             // measurement or currency
@@ -144,9 +149,13 @@ const parseBarcode = (function () {
                 auxString = stringToParse.slice(0, offset) +
                             '.' +
                             stringToParse.slice(offset, stringToParse.length);
-                try {
-                    auxFloat = parseFloat(auxString);
-                } catch (e36) {
+
+                // parseFloat does not throw on rubbish, it returns NaN, so the
+                // number has to be looked at rather than merely parsed. Without
+                // this a measure written in letters came back as a successful
+                // parse carrying null.
+                auxFloat = parseFloat(auxString);
+                if (isNaN(auxFloat)) {
                     throw "36";
                 }
 
@@ -212,22 +221,24 @@ const parseBarcode = (function () {
                     currentCentury = currentCCYY - currentYear,
                     yearGap = 0;
 
-                try {
-                    yearAsNumber = parseInt(dateYYMMDD.slice(0, 2), 10);
-                    yearGap = yearAsNumber - currentYear;
-                } catch (e33) {
+                // parseInt does not throw on rubbish, it returns NaN, so each
+                // part has to be looked at rather than merely parsed. Without
+                // this a date written in letters came back as a successful
+                // parse carrying an Invalid Date, which every caller then had
+                // to notice for itself.
+                yearAsNumber = parseInt(dateYYMMDD.slice(0, 2), 10);
+                if (isNaN(yearAsNumber)) {
                     throw "33";
                 }
+                yearGap = yearAsNumber - currentYear;
 
-                try {
-                    monthAsNumber = parseInt(dateYYMMDD.slice(2, 4), 10);
-                } catch (e34) {
+                monthAsNumber = parseInt(dateYYMMDD.slice(2, 4), 10);
+                if (isNaN(monthAsNumber)) {
                     throw "34";
                 }
 
-                try {
-                    dayAsNumber = parseInt(dateYYMMDD.slice(4, 6), 10);
-                } catch (e35) {
+                dayAsNumber = parseInt(dateYYMMDD.slice(4, 6), 10);
+                if (isNaN(dayAsNumber)) {
                     throw "35";
                 }
                 // Year determination
@@ -1971,8 +1982,13 @@ const parseBarcode = (function () {
                     throw "invalid number";
                 case "37":
                     throw "truncated fixed length element";
+                /* c8 ignore start -- every code the parser throws has an arm
+                   above, so this one cannot be reached. It stays as the guard
+                   it is, and is kept out of the coverage figure rather than
+                   being dropped to flatter it. */
                 default:
                     throw "unknown error";
+                /* c8 ignore stop */
                 }
             }
         }

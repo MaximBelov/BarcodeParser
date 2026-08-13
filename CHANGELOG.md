@@ -29,6 +29,16 @@ Releases before 1.0.3 predate this file and are not reconstructed here.
   went from 94% of statements and 77% of branches to 99% and 97%. ([#11])
 - Identifiers `7030`-`7039`, `7230`-`7239` and `8026`, which the parser supported but which
   were missing from the table meant to hold all of them. ([#11])
+- Specs taking coverage to 100% of statements, branches, functions and lines, with the
+  thresholds set there. The far half of the sliding year window is reached by moving the
+  clock, being otherwise unreachable until 2050. ([#13])
+
+### Fixed
+
+- A date or a measure written in something other than digits is refused instead of coming
+  back as a successful parse holding an `Invalid Date` or a null weight. Both were read with
+  `parseInt` and `parseFloat`, wrapped in a `try` which could never fire because neither
+  throws on rubbish — they return `NaN`. ([#13])
 
 ### Changed
 
@@ -130,3 +140,4 @@ rest of the tags exist.
 [#9]: https://github.com/MaximBelov/BarcodeParser/pull/9
 [#10]: https://github.com/MaximBelov/BarcodeParser/pull/10
 [#11]: https://github.com/MaximBelov/BarcodeParser/pull/11
+[#13]: https://github.com/MaximBelov/BarcodeParser/pull/13

@@ -241,19 +241,14 @@ exercises fails rather than passing quietly.
 there for editors and other tools. Neither is checked in. Every CI run prints the table
 in its job summary and attaches the HTML report as an artifact.
 
-What is left uncovered is code which cannot be reached, rather than code nobody got round
-to:
+The suite covers 100% of statements, branches, functions and lines, and the thresholds are
+set there, so anything less fails the build.
 
-- the `catch` arms around `parseInt` and `parseFloat`, neither of which throws, and the
-  messages they map to;
-- the `default` arm of the element type switch, since every caller passes a known type;
-- the `default` arm of the message switch, since every code in use has an arm of its own;
-- the half of the sliding year window which reads a year as belonging to the century ahead.
-  It needs a two digit year at least fifty behind the current one, which cannot be written
-  in two digits before 2050.
-
-Deleting unreachable code would be a change to the parser rather than to its specs, so it
-is left alone and written down here instead.
+Two guards are held out of that figure with `c8 ignore`, each with a comment saying why:
+the `default` arm of the element type switch, and the `default` arm of the message switch.
+Neither can be reached — every caller passes a known type, and every code the parser throws
+has an arm of its own — and both are worth keeping as guards. They are excluded rather than
+deleted, which would have been flattering the number at the cost of the code.
 
 CI runs the same commands on every push and pull request. A push to `master` whose
 `package.json` version is not yet on the registry is published to npm through
