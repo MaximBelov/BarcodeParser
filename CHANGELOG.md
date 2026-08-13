@@ -16,6 +16,11 @@ Releases before 1.0.3 predate this file and are not reconstructed here.
   with the two digit one puts the date in the wrong century and leaves the surplus digits
   behind to be parsed as another identifier, so the barcode comes back with a spurious
   extra element instead of an error. ([#9])
+- Date elements carry their date as text in a new `isoDate`, e.g. `"2025-06-30"`, or
+  `"1985-06-30T14:35"` where the element holds a time. A date without a time of day cannot be
+  carried unambiguously in a Javascript `Date` — reading one back means choosing between the
+  local getters and the UTC ones, and either choice shifts the day for somebody. The text says
+  the day the barcode says, wherever the reader sits. ([#15])
 - The human readable form of an element string is accepted:
   `(01)04012345678901(17)261230(10)ABC123`. It is rewritten into the separated form and
   parsed by the same identifiers as a scanned code, so both give the same result. Without a
@@ -141,3 +146,4 @@ rest of the tags exist.
 [#10]: https://github.com/MaximBelov/BarcodeParser/pull/10
 [#11]: https://github.com/MaximBelov/BarcodeParser/pull/11
 [#13]: https://github.com/MaximBelov/BarcodeParser/pull/13
+[#15]: https://github.com/MaximBelov/BarcodeParser/pull/15

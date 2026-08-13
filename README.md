@@ -133,11 +133,19 @@ try {
 The function returns an object containing two elements:
 
 * `codeName`: a barcode type identifier (a simple string denoting the type of barcode) and
-* `parsedCodeItems`: an array of objects, each with four attributes:
+* `parsedCodeItems`: an array of objects, each with these attributes:
  * `ai`: the application identifier
  * `title`: the title of the element, i.e. a short description
  * `data`: the contents, either a string, a number or a date
  * `unit`: the unit of measurement, a country code, a currency; denoted in ISO codes.
+ * `raw`: the untouched substring the contents were read from
+ * `isoDate`: for a date element, its date as text, e.g. `"2025-06-30"`; empty on every other kind of element
+
+A date without a time of day cannot be carried unambiguously in a Javascript `Date`: reading one
+back means knowing whether to use the local getters or the UTC ones, and either choice shifts the
+day for somebody. `parseBarcode("]C117250630")` serialised with `toISOString()` from Auckland gives
+the 29th of June. That is what `isoDate` is for — it says the day the barcode says, wherever the
+reader sits. An element carrying a time of day puts that there too: `"1985-06-30T14:35"`.
 
 From the example above: `parseBarcode()` will return an object with "GS1-128" in its attribute `codeName`, the fourth element of `parsedCodeItems` is an object which has the attributes
 

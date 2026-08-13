@@ -84,6 +84,8 @@ const parseBarcode = (function () {
             }
             this.unit = ""; // some elements are accompaigned by an unit of
             // measurement or currency
+            this.isoDate = ""; // date elements also carry their date as text,
+            // empty on every other kind of element
         }
 
         /**
@@ -160,6 +162,32 @@ const parseBarcode = (function () {
                 }
 
                 return auxFloat;
+            }
+            /**
+             * Writes the date an element was read as into its isoDate, as text.
+             *
+             * A date without a time of day cannot be carried unambiguously in a
+             * Javascript Date: whoever reads it has to know whether to use the
+             * local getters or the UTC ones, and picking either shifts the day
+             * for somebody. The text is read off the local getters, which are
+             * the ones the date was built with, so it says the day the barcode
+             * says whatever timezone the reader sits in.
+             *
+             * @param {Date}    date     the date the element was read as
+             * @param {Boolean} withTime whether the element carried a time too
+             */
+            function setIsoDate(date, withTime) {
+                var text = String(date.getFullYear()).padStart(4, "0") + "-" +
+                        String(date.getMonth() + 1).padStart(2, "0") + "-" +
+                        String(date.getDate()).padStart(2, "0");
+
+                if (withTime) {
+                    text = text + "T" +
+                        String(date.getHours()).padStart(2, "0") + ":" +
+                        String(date.getMinutes()).padStart(2, "0");
+                }
+
+                elementToReturn.isoDate = text;
             }
             /**
              * Elements of fixed length are spliced out of the codestring by
@@ -271,6 +299,7 @@ const parseBarcode = (function () {
                 }
 
                 elementToReturn.data.setFullYear(yearAsNumber, monthAsNumber, dayAsNumber);
+                setIsoDate(elementToReturn.data, false);
                 codestringToReturn = codestring.slice(offSet + 6, codestringLength);
                 elementToReturn.raw = codestring.slice(offSet, offSet+6);
             }
@@ -339,6 +368,7 @@ const parseBarcode = (function () {
                     throw "35";
                 }
 
+                setIsoDate(elementToReturn.data, withTime);
                 codestringToReturn = codestring.slice(offSet + length, codestringLength);
                 elementToReturn.raw = digits;
             }
