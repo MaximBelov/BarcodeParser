@@ -7,7 +7,8 @@ Forked from [upstream](https://github.com/PeterBrockfeld/BarcodeParser), whose `
 Published as [`gs1-barcode-parser-mod`](https://www.npmjs.com/package/gs1-barcode-parser-mod).
 
 Changes from upstream:
-- Covers 193 application identifiers against upstream's 134; the 41x, 43x, 70xx, 71x, 72xx, 80xx and 82xx families were added since the fork point.
+- Covers 205 application identifiers against upstream's 134; the 41x, 43x, 70xx, 71x, 72xx, 725x, 80xx and 82xx families were added since the fork point.
+- Reads the person related identifiers used in healthcare (7250-7259), whose dates carry a four digit year rather than the two digit year of the older date elements.
 - Resolves a two digit year with the sliding window from section 7.1.2 of the GS1 General Specifications, relative to the current year, instead of upstream's fixed "51-99 belongs to the 20th century" rule.
 - Exports `parseBarcode` as a CommonJS module rather than leaving it a browser global, so it can be `require`d.
 - Adds a `raw` property to every parsed element, holding the untouched substring it was read from.

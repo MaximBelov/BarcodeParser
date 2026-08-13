@@ -10,6 +10,12 @@ Releases before 1.0.3 predate this file and are not reconstructed here.
 
 ### Added
 
+- Identifiers `03` MTO GTIN, `716` NHRN AIC and the person block `7250`-`7259`, which
+  identifies a patient rather than a trade item, taking coverage from 193 identifiers to
+  205. `7250` and `7251` carry a four digit year and get their own parser: reading them
+  with the two digit one puts the date in the wrong century and leaves the surplus digits
+  behind to be parsed as another identifier, so the barcode comes back with a spurious
+  extra element instead of an error. ([#9])
 - The human readable form of an element string is accepted:
   `(01)04012345678901(17)261230(10)ABC123`. It is rewritten into the separated form and
   parsed by the same identifiers as a scanned code, so both give the same result. Without a
@@ -121,5 +127,6 @@ rest of the tags exist.
 [#6]: https://github.com/MaximBelov/BarcodeParser/pull/6
 [#7]: https://github.com/MaximBelov/BarcodeParser/pull/7
 [#8]: https://github.com/MaximBelov/BarcodeParser/pull/8
+[#9]: https://github.com/MaximBelov/BarcodeParser/pull/9
 [#10]: https://github.com/MaximBelov/BarcodeParser/pull/10
 [#11]: https://github.com/MaximBelov/BarcodeParser/pull/11

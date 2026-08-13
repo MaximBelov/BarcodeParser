@@ -265,6 +265,74 @@ const parseBarcode = (function () {
             }
 
             /**
+             * The person related AIs carry a full four digit year rather than
+             * the two digit year of the older date AIs, so there is no century
+             * to guess at: "7250" is YYYYMMDD, "7251" is YYYYMMDDHHMM.
+             *
+             * Reading one of these with parseDate would take the first six
+             * digits as a two digit date and leave the rest of the year behind
+             * to be parsed as another AI, which yields a wrong date and a
+             * spurious element rather than an error.
+             *
+             * @param {String}  ai       the AI to use
+             * @param {String}  title    its title, i.e. its short description
+             * @param {Boolean} withTime whether hours and minutes follow the date
+             */
+            function parseLongDate(ai, title, withTime) {
+                elementToReturn = new ParsedElement(ai, title, "D");
+                var offSet = ai.length,
+                    length = withTime ? 12 : 8,
+                    digits = codestring.slice(offSet, offSet + length),
+                    yearAsNumber = 0,
+                    monthAsNumber = 0,
+                    dayAsNumber = 0,
+                    hoursAsNumber = 0,
+                    minutesAsNumber = 0;
+
+                if (digits.length < length || (/^\d+$/).test(digits) === false) {
+                    throw "33";
+                }
+
+                yearAsNumber = parseInt(digits.slice(0, 4), 10);
+                monthAsNumber = parseInt(digits.slice(4, 6), 10);
+                dayAsNumber = parseInt(digits.slice(6, 8), 10);
+
+                if (monthAsNumber < 1 || monthAsNumber > 12) {
+                    throw "34";
+                }
+                if (dayAsNumber < 1 || dayAsNumber > 31) {
+                    throw "35";
+                }
+
+                if (withTime) {
+                    hoursAsNumber = parseInt(digits.slice(8, 10), 10);
+                    minutesAsNumber = parseInt(digits.slice(10, 12), 10);
+
+                    if (hoursAsNumber > 23 || minutesAsNumber > 59) {
+                        throw "36";
+                    }
+                }
+
+                // Months start at 0 in Javascript, days start at 1.
+                elementToReturn.data.setFullYear(yearAsNumber, monthAsNumber - 1, dayAsNumber);
+                elementToReturn.data.setHours(hoursAsNumber, minutesAsNumber, 0, 0);
+
+                // Javascript rolls an impossible day over into the next month,
+                // so the 29th of February in a common year quietly becomes the
+                // 1st of March. parseDate leans on that rollover deliberately,
+                // to turn a day of "00" into the last day of the month, but
+                // these elements have no such reading: a date of birth is
+                // either a real day or an error.
+                if (elementToReturn.data.getDate() !== dayAsNumber ||
+                        elementToReturn.data.getMonth() !== monthAsNumber - 1) {
+                    throw "35";
+                }
+
+                codestringToReturn = codestring.slice(offSet + length, codestringLength);
+                elementToReturn.raw = digits;
+            }
+
+            /**
              * simple: the element has a fixed length AND is not followed by an FNC1.
              * @param {String} ai     the AI to use
              * @param {String} title  its title, i.e. its short description
@@ -461,6 +529,10 @@ const parseBarcode = (function () {
                 case "2":
                     // GTIN of Contained Trade Items
                     parseFixedLength("02", "CONTENT", 14);
+                    break;
+                case "3":
+                    // Identification of a Made-to-Order (MtO) trade item
+                    parseFixedLength("03", "MTO GTIN", 14);
                     break;
                 default:
                     throw "01";
@@ -1301,6 +1373,10 @@ const parseBarcode = (function () {
                         // National Healthcare Reimbursement Number (NHRN) - United States of America NDC
                         parseVariableLength("715", "NHRN NDC");
                         break;
+                    case "6":
+                        // National Healthcare Reimbursement Number (NHRN) - Italy AIC
+                        parseVariableLength("716", "NHRN AIC");
+                        break;
                     default:
                         throw "20";
                     }
@@ -1330,6 +1406,51 @@ const parseBarcode = (function () {
                         case "2":
                             // Version Control Number (VCN)
                             parseVariableLength("7242", "VCN");
+                            break;
+                        }
+                        break;
+                    case "5":
+                        // the person related AIs, used in healthcare
+                        switch (fourthNumber) {
+                        case "0":
+                            // Date of birth (YYYYMMDD)
+                            parseLongDate("7250", "DOB", false);
+                            break;
+                        case "1":
+                            // Date and time of birth (YYYYMMDDHHMM)
+                            parseLongDate("7251", "DOB TIME", true);
+                            break;
+                        case "2":
+                            // Biological sex
+                            parseFixedLength("7252", "BIOLOGICAL SEX", 1);
+                            break;
+                        case "3":
+                            // Family name of person
+                            parseVariableLength("7253", "FAMILY NAME");
+                            break;
+                        case "4":
+                            // Given name of person
+                            parseVariableLength("7254", "GIVEN NAME");
+                            break;
+                        case "5":
+                            // Name suffix of person
+                            parseVariableLength("7255", "NAME SUFFIX");
+                            break;
+                        case "6":
+                            // Full name of person
+                            parseVariableLength("7256", "FULL NAME");
+                            break;
+                        case "7":
+                            // Address of person
+                            parseVariableLength("7257", "PERSON ADDR");
+                            break;
+                        case "8":
+                            // Baby birth sequence
+                            parseVariableLength("7258", "BIRTH SEQUENCE");
+                            break;
+                        case "9":
+                            // Baby of family name
+                            parseVariableLength("7259", "BABY");
                             break;
                         }
                         break;
