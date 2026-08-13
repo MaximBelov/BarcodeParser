@@ -164,6 +164,22 @@ const parseBarcode = (function () {
                 return auxFloat;
             }
             /**
+             * Two identifiers are built by putting the fourth digit onto a stem
+             * rather than by matching it: "703" and "723". A barcode which stops
+             * before that digit therefore yielded an element whose ai was the
+             * three digit stem, which is not an identifier the standard defines,
+             * and whose title trailed off after the "#".
+             *
+             * The switches which match their fourth digit have a default arm to
+             * catch this; these two have nothing to match, so they ask here.
+             */
+            function checkFourthNumber() {
+                if (fourthNumber === "") {
+                    throw "39";
+                }
+            }
+
+            /**
              * Writes the date an element was read as into its isoDate, as text.
              *
              * A date without a time of day cannot be carried unambiguously in a
@@ -1371,6 +1387,7 @@ const parseBarcode = (function () {
 
                         // Title and stem for parsing are build from 4th number:
 
+                        checkFourthNumber();
                         parseVariableLengthWithISOChars("703" + fourthNumber, "PROCESSOR # " + fourthNumber);
                         break;
                     case "4":
@@ -1432,6 +1449,7 @@ const parseBarcode = (function () {
                     // 0, 1 and 2 are unused
                     case "3":
                         // Certification reference
+                        checkFourthNumber();
                         parseVariableLength("723" + fourthNumber, "CERT # " + fourthNumber);
                         break;
                     case "4":

@@ -71,3 +71,38 @@ describe("The identifiers which do exist, given their missing digit", () => {
         expect(result.parsedCodeItems.map((item) => item.ai)).toEqual(["4300", "10"]);
     });
 });
+
+/**
+ * Two identifiers are built by putting the fourth digit onto a stem rather than
+ * by matching it, so there is no switch arm to fall through: a barcode stopping
+ * before that digit came back with an ai of "703" or "723", neither of which the
+ * standard defines, and a title trailing off after the "#".
+ */
+describe("An identifier whose fourth digit makes up its number", () => {
+    it("refuses a processor number with no fourth digit", () => {
+        expect(() => parseBarcode("]C1703")).toThrow("unrecognised AI");
+    });
+
+    it("refuses a certification reference with no fourth digit", () => {
+        expect(() => parseBarcode("]C1723")).toThrow("unrecognised AI");
+    });
+
+    it("reads them once the fourth digit is there", () => {
+        expect(parseBarcode("]C17030056ABC").parsedCodeItems[0]).toEqual(jasmine.objectContaining({
+            ai: "7030",
+            dataTitle: "PROCESSOR # 0",
+            data: "ABC",
+            unit: "056"
+        }));
+        expect(parseBarcode("]C17239ABC123").parsedCodeItems[0]).toEqual(jasmine.objectContaining({
+            ai: "7239",
+            dataTitle: "CERT # 9",
+            data: "ABC123"
+        }));
+    });
+
+    it("leaves a real three digit identifier alone", () => {
+        // 421 is three digits by definition, not a stem waiting for a fourth.
+        expect(parseBarcode("]C1421056ABC").parsedCodeItems[0].ai).toBe("421");
+    });
+});
