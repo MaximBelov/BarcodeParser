@@ -1727,6 +1727,21 @@ const parseBarcode = (function () {
              * functions) and the (cleaned) rest of codestring.
              */
 
+            /**
+             * Several of the inner switches carry no default arm, so nothing
+             * matches and nothing parses when the digit one of them is about to
+             * read is missing, or names something the parser does not know.
+             * elementToReturn is then left the empty string it started as, and
+             * that used to be pushed onto the answer: the caller got a
+             * successful parse holding "" rather than an error.
+             *
+             * Guarding here rather than in each of those switches means an AI
+             * added later without a default cannot bring the fault back.
+             */
+            if (elementToReturn === "") {
+                throw "39";
+            }
+
             return ({
                 element: elementToReturn,
                 codestring: cleanCodestring(codestringToReturn)
@@ -2012,6 +2027,8 @@ const parseBarcode = (function () {
                     throw "invalid number";
                 case "37":
                     throw "truncated fixed length element";
+                case "39":
+                    throw "unrecognised AI";
                 /* c8 ignore start -- every code the parser throws has an arm
                    above, so this one cannot be reached. It stays as the guard
                    it is, and is kept out of the coverage figure rather than
