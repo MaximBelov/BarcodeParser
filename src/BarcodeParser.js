@@ -1132,7 +1132,7 @@ const parseBarcode = (function () {
                     default:
                         throw "16";
                     }
-                  
+                    break;
                 default:
                     throw "17";
                 }
