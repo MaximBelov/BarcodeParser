@@ -207,6 +207,11 @@ The other two just contain three characters: "1", the "&lt;GS&gt;" group separat
 
 You can print them using the "ExamplesForBarcode.pdf".
 
+## Changes
+
+What changed in each release is in [CHANGELOG.md](CHANGELOG.md), including the behaviour
+changes worth reading before you upgrade.
+
 ## Development
 
 ```bash
