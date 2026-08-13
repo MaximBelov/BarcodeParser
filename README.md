@@ -221,6 +221,25 @@ single large nested `switch`, where a missing `break` makes an identifier throw,
 `undefined`, or silently parse as its neighbour — so an identifier added without being
 wired up correctly fails the suite rather than shipping.
 
+### Coverage
+
+```bash
+npm run coverage   # the suite, plus a coverage report in coverage/
+```
+
+`c8` reads V8's own coverage, so the source is measured as it runs, unmodified. The
+thresholds live in `.c8rc.json` and are enforced: a change which adds a branch nothing
+exercises fails rather than passing quietly.
+
+`coverage/index.html` is a browsable line-by-line report, and `coverage/lcov.info` is
+there for editors and other tools. Neither is checked in. Every CI run prints the table
+in its job summary and attaches the HTML report as an artifact.
+
+Two areas are still uncovered: the switch which turns an internal error code into its
+message, and every symbology identifier other than `]C1`, which is the only one the specs
+use. Both are reachable and worth specs; the thresholds are set to today's numbers so they
+can only go up.
+
 CI runs the same commands on every push and pull request. A push to `master` whose
 `package.json` version is not yet on the registry is published to npm through
 [Trusted Publishing](https://docs.npmjs.com/trusted-publishers); a push that does not
