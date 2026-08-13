@@ -6,6 +6,26 @@ Notable changes to `gs1-barcode-parser-mod`. The format follows
 
 Releases before 1.0.3 predate this file and are not reconstructed here.
 
+## Unreleased
+
+### Added
+
+- Date elements carry their date as text in a new `isoDate`, e.g. `"2025-06-30"`, or
+  `"1985-06-30T14:35"` where the element holds a time. A date without a time of day cannot be
+  carried unambiguously in a Javascript `Date` — reading one back means choosing between the
+  local getters and the UTC ones, and either choice shifts the day for somebody. The text says
+  the day the barcode says, wherever the reader sits. ([#15])
+
+### Fixed
+
+- A barcode which stops part way through an application identifier is refused instead of
+  coming back as a successful parse holding an empty element. Several inner switches carry no
+  default arm, so 26 three digit prefixes — `]C1230`, `]C1430`, `]C1701` and the rest — matched
+  nothing, parsed nothing, and returned `""` where an element should have been. Some are a real
+  family with the last digit missing, others name nothing the standard defines. The guard sits
+  at the end of the identifier switch rather than in each arm, so an identifier added later
+  without a default cannot bring it back. ([#16])
+
 ## 1.1.0 - 2026-08-13
 
 ### Added
@@ -16,11 +36,6 @@ Releases before 1.0.3 predate this file and are not reconstructed here.
   with the two digit one puts the date in the wrong century and leaves the surplus digits
   behind to be parsed as another identifier, so the barcode comes back with a spurious
   extra element instead of an error. ([#9])
-- Date elements carry their date as text in a new `isoDate`, e.g. `"2025-06-30"`, or
-  `"1985-06-30T14:35"` where the element holds a time. A date without a time of day cannot be
-  carried unambiguously in a Javascript `Date` — reading one back means choosing between the
-  local getters and the UTC ones, and either choice shifts the day for somebody. The text says
-  the day the barcode says, wherever the reader sits. ([#15])
 - The human readable form of an element string is accepted:
   `(01)04012345678901(17)261230(10)ABC123`. It is rewritten into the separated form and
   parsed by the same identifiers as a scanned code, so both give the same result. Without a
@@ -147,3 +162,4 @@ rest of the tags exist.
 [#11]: https://github.com/MaximBelov/BarcodeParser/pull/11
 [#13]: https://github.com/MaximBelov/BarcodeParser/pull/13
 [#15]: https://github.com/MaximBelov/BarcodeParser/pull/15
+[#16]: https://github.com/MaximBelov/BarcodeParser/pull/16
