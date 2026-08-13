@@ -6,7 +6,7 @@ Notable changes to `gs1-barcode-parser-mod`. The format follows
 
 Releases before 1.0.3 predate this file and are not reconstructed here.
 
-## Unreleased
+## 1.2.0 - 2026-08-13
 
 ### Added
 
@@ -18,6 +18,10 @@ Releases before 1.0.3 predate this file and are not reconstructed here.
 
 ### Fixed
 
+- README figures corrected. It claimed 205 identifiers against upstream's 134; counted the same
+  way for both, the parser accepts 226 and upstream 143. It also documented an element attribute
+  `title`, where the property is `dataTitle`, and sent readers to a `scripts` folder that no
+  longer exists. ([#17])
 - A barcode which stops part way through an application identifier is refused instead of
   coming back as a successful parse holding an empty element. Several inner switches carry no
   default arm, so 26 three digit prefixes — `]C1230`, `]C1430`, `]C1701` and the rest — matched
@@ -163,3 +167,4 @@ rest of the tags exist.
 [#13]: https://github.com/MaximBelov/BarcodeParser/pull/13
 [#15]: https://github.com/MaximBelov/BarcodeParser/pull/15
 [#16]: https://github.com/MaximBelov/BarcodeParser/pull/16
+[#17]: https://github.com/MaximBelov/BarcodeParser/pull/17
