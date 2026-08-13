@@ -152,6 +152,29 @@ const parseBarcode = (function () {
                 return auxFloat;
             }
             /**
+             * Elements of fixed length are spliced out of the codestring by
+             * position, so a barcode which was cut short still yields a
+             * slice - just a shorter one than the AI allows.
+             *
+             * This function checks that the data is really there and throws
+             * if it isn't.
+             *
+             * @param {Number} offSet the number of characters taken by the AI
+             * @param {Number} length the number of characters the data needs
+             */
+            function checkFixedLength(offSet, length) {
+                if (codestringLength - offSet < length) {
+                    throw "37";
+                }
+                // Counting characters is not enough: a group separator inside
+                // the window means the element ended before the AI said it
+                // would, and the characters after it belong to the next
+                // element rather than to this one.
+                if (codestring.slice(offSet, offSet + length).indexOf(fncChar) !== -1) {
+                    throw "37";
+                }
+            }
+            /**
              * ======== END of auxiliary function for identifyAI =======
              */
 
@@ -175,8 +198,11 @@ const parseBarcode = (function () {
              */
             function parseDate(ai, title) {
                 elementToReturn = new ParsedElement(ai, title, "D");
-                var offSet = ai.length,
-                    dateYYMMDD = codestring.slice(offSet, offSet + 6),
+                var offSet = ai.length;
+
+                checkFixedLength(offSet, 6);
+
+                var dateYYMMDD = codestring.slice(offSet, offSet + 6),
                     yearAsNumber = 0,
                     monthAsNumber = 0,
                     dayAsNumber = 0;
@@ -247,6 +273,9 @@ const parseBarcode = (function () {
 
                 elementToReturn = new ParsedElement(ai, title, "S");
                 var offSet = ai.length;
+
+                checkFixedLength(offSet, length);
+
                 elementToReturn.data = codestring.slice(offSet, length + offSet);
                 codestringToReturn = codestring.slice(length + offSet, codestringLength);
                 elementToReturn.raw = codestring.slice(offSet, offSet + length);
@@ -292,8 +321,11 @@ const parseBarcode = (function () {
                 elementToReturn = new ParsedElement(ai_stem + fourthNumber, title, "N");
                 var offSet = ai_stem.length + 1,
                     numberOfDecimals = parseInt(fourthNumber, 10),
-                    numberPart = codestring.slice(offSet, offSet + 6);
+                    numberPart = "";
 
+                checkFixedLength(offSet, 6);
+
+                numberPart = codestring.slice(offSet, offSet + 6);
                 elementToReturn.data = parseFloatingPoint(numberPart, numberOfDecimals);
 
                 elementToReturn.unit = unit;
@@ -1702,6 +1734,8 @@ const parseBarcode = (function () {
                     throw "invalid day in date";
                 case "36":
                     throw "invalid number";
+                case "37":
+                    throw "truncated fixed length element";
                 default:
                     throw "unknown error";
                 }
