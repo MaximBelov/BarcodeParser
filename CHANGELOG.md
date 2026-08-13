@@ -6,6 +6,15 @@ Notable changes to `gs1-barcode-parser-mod`. The format follows
 
 Releases before 1.0.3 predate this file and are not reconstructed here.
 
+## 1.2.1 - 2026-08-13
+
+### Fixed
+
+- `703` and `723` build their identifier by putting the fourth digit onto a stem rather than by
+  matching it, so a barcode stopping before that digit had no switch arm to fall through and came
+  back as a successful parse whose `ai` was `"703"` or `"723"` — neither of which the standard
+  defines — with a title trailing off after the `#`. Both are refused now. ([#18])
+
 ## 1.2.0 - 2026-08-13
 
 ### Added
@@ -168,3 +177,4 @@ rest of the tags exist.
 [#15]: https://github.com/MaximBelov/BarcodeParser/pull/15
 [#16]: https://github.com/MaximBelov/BarcodeParser/pull/16
 [#17]: https://github.com/MaximBelov/BarcodeParser/pull/17
+[#18]: https://github.com/MaximBelov/BarcodeParser/pull/18
